@@ -1,22 +1,24 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Animation Sandbox</title>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <script src="coi-serviceworker.js"></script>
-  </head>
-  <body>
-    
-    <canvas id="canvas" style="height:300px;width:300px"></canvas>
-    <video id="myVideo" controls="controls"></video>
-    <video id="output-video" controls="controls"></video>
-    <a id="dl" href="" download="download.mp4"></a>
-    <div id="message"></div>
-
-  </body>
-  <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.8.1/dist/ffmpeg.min.js"></script>
-  <script src="saveCanvas.js"></script>
-
-</html>
+<!doctype html>
+<head>
+  <title>CANVAS TO VIDEO FAILS ON SAFARI</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+  <header>
+    <h1>CANVAS TO VIDEO FAILS ON SAFARI</h1>
+    <p>Record canvas to video</p>
+    <p>This example renders white noise in a <code>canvas</code> for three seconds and records the output in a video clip, using <code>canvas.captureStream</code> and <code>MediaRecorder</code></p>
+  </header>
+  <main class="row">
+    <figure>
+      <canvas id="canvas" width="320" height="320"></canvas><br>
+      <caption>This is a <code>canvas</code> element</caption>
+    </figure>
+    <figure>
+      <video id="video" controls loop></video><br>
+      <caption>This is a <code>video</code> element</caption>
+    </figure>
+  </main>
+</body>
+<script src="saveCanvas.js"></script>

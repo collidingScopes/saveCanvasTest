@@ -1,73 +1,96 @@
-const { createFFmpeg } = FFmpeg;
-const ffmpeg = createFFmpeg({
-  log: true
-});
+// This example gets a video stream from a canvas on which we will draw
+// black and white noise, and captures it to a video
+//
+// The relevant functions in use are:
+//
+// requestAnimationFrame -> to create a render loop (better than setTimeout)
+// canvas.captureStream -> to get a stream from a canvas
+// context.getImageData -> to get access to the canvas pixels
+// URL.createObjectURL -> to create a URL from a stream so we can use it as src
 
-const transcode = async (webcamData) => {
-  const message = document.getElementById('message');
-  const name = 'record.webm';
-  await ffmpeg.load();
-  message.innerHTML = 'Start transcoding';
-  await ffmpeg.write(name, webcamData);
-  await ffmpeg.transcode(name,  'output.mp4');
-  message.innerHTML = 'Complete transcoding';
-  const data = ffmpeg.read('output.mp4');
-
-  const video = document.getElementById('output-video');
-  video.src = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
-  dl.href = video.src;
-  dl.innerHTML = "download mp4"
-}
-
-fn().then(async ({url, blob})=>{
-    transcode(new Uint8Array(await (blob).arrayBuffer()));
-})
-
-function fn() {
-    var recordedChunks = [];
-    var time = 0;
-    var canvas = document.getElementById("canvas");
-
-    return new Promise(function (res, rej) {
-        var stream = canvas.captureStream(30);
-
-        mediaRecorder = new MediaRecorder(stream, {
-            mimeType: "video/webm; codecs=vp9"
-        });
-
-        mediaRecorder.start(time);
-
-        mediaRecorder.ondataavailable = function (e) {
-            recordedChunks.push(e.data);
-            // for demo, removed stop() call to capture more than one frame
-        }
-
-        mediaRecorder.onstop = function (event) {
-            var blob = new Blob(recordedChunks, {
-                "type": "video/webm"
-            });
-            var url = URL.createObjectURL(blob);
-            res({url, blob}); // resolve both blob and url in an object
-
-            myVideo.src = url;
-            // removed data url conversion for brevity
-        }
-
-        // for demo, draw random lines and then stop recording
-        var i = 0,
-        tid = setInterval(()=>{
-            if(i++ > 30) { // draw 20 lines
-                clearInterval(tid);
-                mediaRecorder.stop();
-            }
-            let canvas = document.querySelector("canvas");
-            let cx = canvas.getContext("2d");
-            cx.beginPath();
-            cx.strokeStyle = 'green';
-            cx.moveTo(Math.random()*300, Math.random()*300);
-            cx.lineTo(Math.random()*300, Math.random()*300);
-            cx.stroke();
-        },200)
-
-        });
-}
+window.onload = function () {
+    var video = document.getElementById('video');
+    var canvas = document.getElementById('canvas');
+    var width = canvas.width;
+    var height = canvas.height;
+    var capturing = false;
+  
+    video.width = width;
+    video.height = height;
+  
+    // We need the 2D context to individually manipulate pixel data
+    var ctx = canvas.getContext('2d');
+  
+    // Start with a black background
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, width, height);
+    
+    // Since we're continuously accessing and overwriting the pixels
+    // object, we'll request it once and reuse it across calls to draw()
+    // for best performance (we don't need to create ImageData objects
+    // on every frame)
+    var pixels = ctx.getImageData(0, 0, width, height);
+    var data = pixels.data;
+    var numPixels = data.length;
+  
+    var stream = canvas.captureStream(15);
+    var recorder = new MediaRecorder(stream, { 'type': 'video/mp4' });
+  
+    recorder.addEventListener('dataavailable', finishCapturing);
+  
+    startCapturing();
+    recorder.start();
+  
+    setTimeout(function() {
+      recorder.stop();
+    }, 5000);
+  
+  
+    function startCapturing() {
+      capturing = true;
+      draw();
+    }
+  
+    function finishCapturing(e) {
+      //capturing = false;
+      var videoData = [ e.data ];
+      var blobby = new Blob(videoData, { 'type': 'video/mp4' });
+      console.log(blobby)
+      var videoURL = URL.createObjectURL(blobby);
+      video.src = videoURL;
+      video.play();
+    }
+  
+  
+    function draw() {
+      // We don't want to render again if we're not capturing
+      if(capturing) {
+        requestAnimationFrame(draw);
+      }
+      drawWhiteNoise();
+    }
+  
+  
+    function drawWhiteNoise() {
+      var offset = 0;
+  
+      for(var i = 0; i < numPixels; i++) {
+        var grey = Math.round(Math.random() * 255);
+        
+        // The data array has pixel values in RGBA order
+        // (Red, Green, Blue and Alpha for transparency)
+        // We will make R, G and B have the same value ('grey'),
+        // then skip the Alpha value by increasing the offset,
+        // as we're happy with the opaque value we set when painting
+        // the background black at the beginning
+        data[offset++] = grey;
+        data[offset++] = grey;
+        data[offset++] = grey;
+        offset++; // skip the alpha component
+      }
+  
+      // And tell the context to draw the updated pixels in the canvas
+      ctx.putImageData(pixels, 0, 0);
+    }
+  
+  };
