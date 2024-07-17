@@ -1,18 +1,19 @@
 <!doctype html>
 <head>
-  <title>CANVAS TO VIDEO FAILS ON SAFARI</title>
+  <title>Record MP4 Video from Canvas Animation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="style.css">
+
 </head>
 <body>
   <header>
-    <h1>CANVAS TO VIDEO FAILS ON SAFARI</h1>
-    <p>Record canvas to video</p>
-    <p>This example renders white noise in a <code>canvas</code> for three seconds and records the output in a video clip, using <code>canvas.captureStream</code> and <code>MediaRecorder</code></p>
+    <h1>Record MP4 Video from Canvas Animation</h1>
+    <p>This example renders paint splatters in a <code>canvas</code> and records the output in a video clip, using <code>canvas.captureStream</code> and <code>MediaRecorder</code></p>
   </header>
   <main class="row">
     <figure>
-      <canvas id="canvas" width="800" height="800"></canvas><br>
+      <canvas id="canvas" width="500" height="500"></canvas><br>
       <caption>This is a <code>canvas</code> element</caption>
     </figure>
     <!--
@@ -22,7 +23,7 @@
     </figure>
     -->
     <button id="recordButton">Record 10 second video</button>
-    <button id="downloadButton">Download video</button>
+    <p id="userMessageText" class="hidden">Video is recording, and will be saved to your downloads folder in 10 seconds.</p>
   </main>
 </body>
 <script src="saveCanvas.js"></script>

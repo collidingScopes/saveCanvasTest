@@ -8,10 +8,9 @@
 // context.getImageData -> to get access to the canvas pixels
 // URL.createObjectURL -> to create a URL from a stream so we can use it as src
 
+//var downloadButton = document.getElementById("downloadButton");
+//downloadButton.addEventListener("click",downloadBlob);
 var finishedBlob;
-var downloadButton = document.getElementById("downloadButton");
-downloadButton.addEventListener("click",downloadBlob);
-
 var recordButton = document.getElementById("recordButton");
 recordButton.addEventListener("click",startRecording);
 var videoDuration = 10000; //milliseconds
@@ -36,7 +35,7 @@ var pixels = ctx.getImageData(0, 0, width, height);
 var data = pixels.data;
 var numPixels = data.length;
 
-var fps = 24;
+var fps = 15;
 var stream = canvas.captureStream(fps);
 var recorder = new MediaRecorder(stream, { 'type': 'video/mp4' });
 recorder.addEventListener('dataavailable', finishCapturing);
@@ -45,20 +44,24 @@ recorder.addEventListener('dataavailable', finishCapturing);
 draw();
 
 function startRecording(){
+    document.getElementById("userMessageText").classList.remove("hidden");
     recorder.start(); //moved here
     capturing = true;
 
     setTimeout(function() {
         recorder.stop();
-    }, videoDuration);
+    }, videoDuration+500);
 }
 
 function finishCapturing(e) {
-    //capturing = false;
-    var videoData = [ e.data ];
-    finishedBlob = new Blob(videoData, { 'type': 'video/mp4' });
-    console.log(finishedBlob);
-    downloadBlob(finishedBlob);
+    setTimeout(function(){
+        var videoData = [ e.data ];
+        finishedBlob = new Blob(videoData, { 'type': 'video/mp4' });
+        console.log(finishedBlob);
+        downloadBlob(finishedBlob);
+        document.getElementById("userMessageText").classList.add("hidden");
+    },500);
+
     //var videoURL = URL.createObjectURL(finishedBlob);
     //video.src = videoURL;
     //video.play();
@@ -66,15 +69,13 @@ function finishCapturing(e) {
 }
 
 function draw() {
-    // We don't want to render again if we're not capturing
-    //requestAnimationFrame(draw);
-    setInterval(drawWhiteNoise,1000/fps);
-    //drawWhiteNoise();
+    setInterval(paintSplatter,1000/fps);
 }
 
 
-function drawWhiteNoise() {
+function paintSplatter() {
     
+    /*
     var offset = 0;
     for(var i = 0; i < numPixels; i++) {
     var grey = Math.round(Math.random() * 255);
@@ -86,6 +87,26 @@ function drawWhiteNoise() {
 
     // And tell the context to draw the updated pixels in the canvas
     ctx.putImageData(pixels, 0, 0);
+    */
+
+    var minPointRadius = 1;
+    var maxPointRadius = 10;
+    var pointRadiusRange = maxPointRadius - minPointRadius;
+
+    var red = Math.random() * 255;
+    var green = Math.random() * 255;
+    var blue = Math.random() * 255;
+    var alpha = 1.0;
+
+    var startAngle = Math.random() * (2 * Math.PI);
+    var endAngle = Math.random() * (2 * Math.PI);
+    var currentPointRadius = minPointRadius + Math.random() * pointRadiusRange;
+
+    ctx.beginPath();
+    ctx.arc(Math.random()*width, Math.random()*height, currentPointRadius, startAngle, endAngle);
+    ctx.fillStyle = `rgba(${red}, ${green}, ${blue}, ${alpha})`;
+    ctx.fill();
+
 }
 
 
