@@ -58,7 +58,8 @@ window.onload = function () {
       console.log(blobby)
       var videoURL = URL.createObjectURL(blobby);
       video.src = videoURL;
-      video.play();
+      //video.play();
+      downloadBlob(blobby);
     }
   
   
@@ -94,3 +95,16 @@ window.onload = function () {
     }
   
   };
+
+function downloadBlob(blob) {
+    let url = window.URL.createObjectURL(blob);
+    let a = document.createElement("a");
+    a.style.display = "none";
+    a.href = url;
+    const date = new Date();
+    const filename = `video_${date.toLocaleDateString()}_${date.toLocaleTimeString()}.mp4`;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
