@@ -8,6 +8,10 @@
 // context.getImageData -> to get access to the canvas pixels
 // URL.createObjectURL -> to create a URL from a stream so we can use it as src
 
+var finishedBlob;
+var downloadButton = document.getElementById("downloadButton");
+downloadButton.addEventListener("click",downloadBlob);
+
 window.onload = function () {
     var video = document.getElementById('video');
     var canvas = document.getElementById('canvas');
@@ -54,12 +58,12 @@ window.onload = function () {
     function finishCapturing(e) {
       //capturing = false;
       var videoData = [ e.data ];
-      var blobby = new Blob(videoData, { 'type': 'video/mp4' });
-      console.log(blobby)
-      var videoURL = URL.createObjectURL(blobby);
+      finishedBlob = new Blob(videoData, { 'type': 'video/mp4' });
+      console.log(finishedBlob)
+      var videoURL = URL.createObjectURL(finishedBlob);
       video.src = videoURL;
       //video.play();
-      downloadBlob(blobby);
+      //downloadBlob(finishedBlob);
     }
   
   
@@ -96,8 +100,8 @@ window.onload = function () {
   
   };
 
-function downloadBlob(blob) {
-    let url = window.URL.createObjectURL(blob);
+function downloadBlob() {
+    let url = window.URL.createObjectURL(finishedBlob);
     let a = document.createElement("a");
     a.style.display = "none";
     a.href = url;
