@@ -24,51 +24,50 @@ fn().then(async ({url, blob})=>{
 })
 
 function fn() {
-var recordedChunks = [];
+    var recordedChunks = [];
+    var time = 0;
+    var canvas = document.getElementById("canvas");
 
-var time = 0;
-var canvas = document.getElementById("canvas");
+    return new Promise(function (res, rej) {
+        var stream = canvas.captureStream(30);
 
-return new Promise(function (res, rej) {
-    var stream = canvas.captureStream(60);
-
-    mediaRecorder = new MediaRecorder(stream, {
-        mimeType: "video/webm; codecs=vp9"
-    });
-
-    mediaRecorder.start(time);
-
-    mediaRecorder.ondataavailable = function (e) {
-        recordedChunks.push(event.data);
-        // for demo, removed stop() call to capture more than one frame
-    }
-
-    mediaRecorder.onstop = function (event) {
-        var blob = new Blob(recordedChunks, {
-            "type": "video/webm"
+        mediaRecorder = new MediaRecorder(stream, {
+            mimeType: "video/webm; codecs=vp9"
         });
-        var url = URL.createObjectURL(blob);
-        res({url, blob}); // resolve both blob and url in an object
 
-        myVideo.src = url;
-        // removed data url conversion for brevity
-    }
+        mediaRecorder.start(time);
 
-// for demo, draw random lines and then stop recording
-var i = 0,
-tid = setInterval(()=>{
-  if(i++ > 20) { // draw 20 lines
-    clearInterval(tid);
-    mediaRecorder.stop();
-  }
-  let canvas = document.querySelector("canvas");
-  let cx = canvas.getContext("2d");
-  cx.beginPath();
-  cx.strokeStyle = 'green';
-  cx.moveTo(Math.random()*100, Math.random()*100);
-  cx.lineTo(Math.random()*100, Math.random()*100);
-  cx.stroke();
-},200)
+        mediaRecorder.ondataavailable = function (e) {
+            recordedChunks.push(e.data);
+            // for demo, removed stop() call to capture more than one frame
+        }
 
-});
+        mediaRecorder.onstop = function (event) {
+            var blob = new Blob(recordedChunks, {
+                "type": "video/webm"
+            });
+            var url = URL.createObjectURL(blob);
+            res({url, blob}); // resolve both blob and url in an object
+
+            myVideo.src = url;
+            // removed data url conversion for brevity
+        }
+
+        // for demo, draw random lines and then stop recording
+        var i = 0,
+        tid = setInterval(()=>{
+            if(i++ > 30) { // draw 20 lines
+                clearInterval(tid);
+                mediaRecorder.stop();
+            }
+            let canvas = document.querySelector("canvas");
+            let cx = canvas.getContext("2d");
+            cx.beginPath();
+            cx.strokeStyle = 'green';
+            cx.moveTo(Math.random()*300, Math.random()*300);
+            cx.lineTo(Math.random()*300, Math.random()*300);
+            cx.stroke();
+        },200)
+
+        });
 }
